@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SiliconReps — Visual Digital Design & SystemVerilog</title>
+<style>
+  :root {
+    --bg-app: #0b1120;
+    --bg-surface: #131c31;
+    --bg-elevated: #1c2842;
+    --bg-card: #162138;
+    --border-subtle: #263554;
+    --border-active: #38bdf8;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --logic-high: #10b981;
+    --logic-high-glow: rgba(16, 185, 129, 0.35);
+    --logic-low: #475569;
+    --clock-amber: #f59e0b;
+    --clock-glow: rgba(245, 158, 11, 0.35);
+    --accent-cyan: #06b6d4;
+    --accent-blue: #3b82f6;
+    --danger: #f43f5e;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    height: 100%;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* App Container */
+  .app-shell {
+    max-width: 520px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-app);
+    position: relative;
+  }
+
+  /* Top HUD Bar */
+  .hud-bar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(11, 17, 32, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .brand-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--logic-high);
+    box-shadow: 0 0 10px var(--logic-high);
+  }
+
+  .stats-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .stat-chip:active {
+    transform: scale(0.95);
+  }
+
+  .stat-chip.streak { color: #fbbf24; }
+  .stat-chip.freeze { color: #38bdf8; }
+  .stat-chip.xp { color: #34d399; }
+
+  /* Home Screen */
+  .home-view {
+    padding: 16px 16px 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .goal-banner {
+    background: linear-gradient(135deg, #13233f 0%, #0f1c33 100%);
+    border: 1px solid #26406b;
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .goal-info h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  .goal-info p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .goal-badge {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(16, 185, 129, 0.14);
+    color: var(--logic-high);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+  }
+
+  .goal-badge.pending {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+
+  /* Track Header */
+  .track-header {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .track-header::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--logic-high);
+  }
+
+  .track-tag {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--logic-high);
+    margin-bottom: 4px;
+  }
+
+  .track-title {
+    font-size: 19px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .track-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .track-progress-bar {
+    margin-top: 12px;
+    height: 8px;
+    background: var(--bg-app);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .track-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--logic-high), var(--accent-cyan));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  /* Winding Lesson Path */
+  .lesson-path {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 8px 0;
+    position: relative;
+  }
+
+  .path-node-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .path-node-wrapper.offset-left { transform: translateX(-34px); }
+  .path-node-wrapper.offset-right { transform: translateX(34px); }
+
+  .lesson-node-btn {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    box-shadow: 0 6px 0 #090e1a;
+  }
+
+  .lesson-node-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #090e1a;
+  }
+
+  .lesson-node-btn.completed {
+    background: linear-gradient(145deg, #10b981, #059669);
+    color: #ffffff;
+    box-shadow: 0 6px 0 #065f46, 0 0 20px rgba(16, 185, 129, 0.28);
+  }
+
+  .lesson-node-btn.current {
+    background: linear-gradient(145deg, #06b6d4, #2563eb);
+    color: #ffffff;
+    box-shadow: 0 6px 0 #1e3a8a, 0 0 24px rgba(6, 182, 212, 0.45);
+    animation: pulseRing 2.2s infinite;
+  }
+
+  .lesson-node-btn.unlocked {
+    background: var(--bg-elevated);
+    border: 2px solid #38bdf8;
+    color: #38bdf8;
+    box-shadow: 0 6px 0 #0f172a;
+  }
+
+  @keyframes pulseRing {
+    0% { box-shadow: 0 6px 0 #1e3a8a, 0 0 0 0 rgba(56, 189, 248, 0.55); }
+    70% { box-shadow: 0 6px 0 #1e3a8a, 0 0 0 14px rgba(56, 189, 248, 0); }
+    100% { box-shadow: 0 6px 0 #1e3a8a, 0 0 0 0 rgba(56, 189, 248, 0); }
+  }
+
+  .start-tag {
+    position: absolute;
+    top: -14px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+  }
+
+  .node-label-card {
+    margin-top: 8px;
+    text-align: center;
+    max-width: 220px;
+  }
+
+  .node-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .node-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* Locked Preview Tracks */
+  .locked-tracks-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .locked-track-card {
+    background: rgba(19, 28, 49, 0.65);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .locked-track-card:active {
+    background: var(--bg-surface);
+    border-color: #475569;
+  }
+
+  .locked-track-card.badge-card {
+    border-style: solid;
+    border-color: rgba(245, 158, 11, 0.35);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(19, 28, 49, 0.8));
+  }
+
+  .locked-track-info h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .locked-track-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .lock-pill {
+    flex-shrink: 0;
+    background: var(--bg-app);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+  }
+
+  /* Lesson Player View */
+  .lesson-view {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--bg-app);
+  }
+
+  .lesson-view.active {
+    display: flex;
+  }
+
+  .lesson-top-bar {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-app);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .close-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .step-progress-track {
+    flex: 1;
+    height: 10px;
+    background: var(--bg-surface);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .step-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--logic-high));
+    border-radius: 999px;
+    transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .step-counter-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  .lesson-stage {
+    flex: 1;
+    padding: 18px 16px 110px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .step-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-cyan);
+  }
+
+  .step-heading {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.25;
+  }
+
+  .step-body-text {
+    font-size: 15px;
+    color: #cbd5e1;
+    line-height: 1.55;
+  }
+
+  /* Visual Circuit & Waveform Cards */
+  .visual-box {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .visual-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+
+  .legend-pills {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dot-1 { width: 8px; height: 8px; border-radius: 50%; background: var(--logic-high); }
+  .dot-0 { width: 8px; height: 8px; border-radius: 50%; background: var(--logic-low); }
+  .dot-clk { width: 8px; height: 8px; border-radius: 50%; background: var(--clock-amber); }
+
+  svg.hardware-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    user-select: none;
+  }
+
+  /* Interactive Step Controls */
+  .clock-control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .tick-readout {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--clock-amber);
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+  }
+
+  .step-clock-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0b1120;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 0 #92400e;
+    transition: transform 0.1s ease;
+  }
+
+  .step-clock-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #92400e;
+  }
+
+  .reset-wave-btn {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .live-state-caption {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(6, 182, 212, 0.08);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px;
+    color: #e2e8f0;
+  }
+
+  /* Quiz & Code Match Options */
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option-card {
+    background: var(--bg-surface);
+    border: 2px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    text-align: left;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .option-card:active {
+    transform: scale(0.99);
+  }
+
+  .option-card.selected {
+    border-color: var(--accent-cyan);
+    background: rgba(6, 182, 212, 0.12);
+  }
+
+  .option-card.correct {
+    border-color: var(--logic-high);
+    background: rgba(16, 185, 129, 0.16);
+  }
+
+  .option-card.wrong {
+    border-color: var(--danger);
+    background: rgba(244, 63, 94, 0.14);
+  }
+
+  .option-label {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .code-block {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.55;
+    background: #090e1a;
+    border: 1px solid #1e293b;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    color: #e2e8f0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .sv-kw { color: #38bdf8; font-weight: 700; }
+  .sv-type { color: #34d399; }
+  .sv-op { color: #fbbf24; }
+  .sv-cmt { color: #64748b; font-style: italic; }
+
+  /* Step 5: Tap-Token Micro Rep */
+  .code-builder-box {
+    background: #090e1a;
+    border: 1px solid #263554;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #e2e8f0;
+  }
+
+  .blank-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    height: 32px;
+    padding: 0 10px;
+    margin: 0 4px;
+    border-radius: 6px;
+    border: 2px dashed #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    font-weight: 800;
+    vertical-align: middle;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .blank-slot.filled {
+    border-style: solid;
+    background: rgba(16, 185, 129, 0.18);
+    border-color: var(--logic-high);
+    color: #34d399;
+  }
+
+  .token-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .token-chip {
+    background: var(--bg-elevated);
+    border: 1px solid #3b4f78;
+    border-bottom: 3px solid #090e1a;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+  }
+
+  .token-chip:active {
+    transform: translateY(2px);
+  }
+
+  .token-chip.used {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .hardware-note-box {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #d1fae5;
+    margin-top: 8px;
+  }
+
+  .hardware-note-box strong {
+    color: var(--logic-high);
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Bottom Action Drawer */
+  .lesson-footer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 520px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    padding: 14px 16px 20px;
+    z-index: 35;
+    transition: background 0.2s ease;
+  }
+
+  .lesson-footer.feedback-ok {
+    background: #062c22;
+    border-top-color: var(--logic-high);
+  }
+
+  .lesson-footer.feedback-err {
+    background: #2f1019;
+    border-top-color: var(--danger);
+  }
+
+  .feedback-msg {
+    display: none;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .feedback-msg.visible {
+    display: block;
+  }
+
+  .feedback-title {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+
+  .feedback-ok .feedback-title { color: #34d399; }
+  .feedback-err .feedback-title { color: #fb7185; }
+
+  .primary-action-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    box-shadow: 0 4px 0 #065f46;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+
+  .primary-action-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .primary-action-btn:not(:disabled):active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #065f46;
+  }
+
+  .feedback-err .primary-action-btn {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    box-shadow: 0 4px 0 #881337;
+  }
+
+  /* Lesson Complete Celebration Screen */
+  .complete-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px 20px;
+    min-height: 100vh;
+    gap: 18px;
+  }
+
+  .complete-screen.active {
+    display: flex;
+  }
+
+  .trophy-circle {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(16,185,129,0.28) 0%, rgba(16,185,129,0.05) 70%);
+    border: 2px solid var(--logic-high);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    box-shadow: 0 0 30px rgba(16,185,129,0.3);
+  }
+
+  .reward-pills {
+    display: flex;
+    gap: 12px;
+    margin: 6px 0;
+  }
+
+  .reward-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 18px;
+    min-width: 110px;
+  }
+
+  .reward-val {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--logic-high);
+  }
+
+  .reward-lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+  }
+
+  /* Modal / Toast */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 17, 0.78);
+    z-index: 60;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open {
+    display: flex;
+  }
+
+  .modal-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-card h3 {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .modal-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .modal-close-btn {
+    margin-top: 6px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- HOME VIEW -->
+  <div id="homeView">
+    <header class="hud-bar">
+      <div class="brand-pill">
+        <span class="brand-dot"></span>
+        <span>SiliconReps</span>
+      </div>
+      <div class="stats-group">
+        <button class="stat-chip streak" onclick="openStreakModal()" title="Daily Streak">
+          <span>🔥</span><span id="hudStreak">1</span>
+        </button>
+        <button class="stat-chip freeze" onclick="openStreakModal()" title="Streak Freezes">
+          <span>❄️</span><span id="hudFreezes">3</span>
+        </button>
+        <div class="stat-chip xp" title="Total XP">
+          <span>⚡</span><span id="hudXp">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="home-view">
+      <!-- Zero-Guilt Daily Goal Banner -->
+      <div class="goal-banner">
+        <div class="goal-info">
+          <h2 id="dailyGoalTitle">1 lesson a day = full success</h2>
+          <p id="dailyGoalSub">2-minute visual rep. Streak freezes protect missed days automatically.</p>
+        </div>
+        <div id="dailyGoalBadge" class="goal-badge pending">Today's Rep</div>
+      </div>
+
+      <!-- Track 1 Header -->
+      <section class="track-header">
+        <div class="track-tag">Track 1 • Active</div>
+        <h1 class="track-title">Foundations of Hardware</h1>
+        <p class="track-desc">See how electricity becomes logic, clocks create time, and flip-flops store memory.</p>
+        <div class="track-progress-bar">
+          <div id="track1ProgressFill" class="track-progress-fill" style="width: 0%;"></div>
+        </div>
+      </section>
+
+      <!-- Track 1 Winding Path -->
+      <div id="lessonPathContainer" class="lesson-path"></div>
+
+      <!-- Locked Tracks 2-6 + Final Project Badge -->
+      <section class="locked-tracks-section">
+        <div class="locked-track-card" onclick="openTrackPreview(2)">
+          <div class="locked-track-info">
+            <h3><span>🔒</span> Track 2: Combinational Circuits</h3>
+            <p>Muxes, decoders, and ripple-carry adders</p>
+          </div>
+          <span class="lock-pill">Preview</span>
+        </div>
+
+        <div class="locked-track-card" onclick="openTrackPreview(3)">
+          <div class="locked-track-info">
+            <h3><span>🔒</span> Track 3: Sequential Circuits</h3>
+            <p>Shift registers, clock enables, and synchronous resets</p>
+          </div>
+          <span class="lock-pill">Preview</span>
+        </div>
+
+        <div class="locked-track-card" onclick="openTrackPreview(4)">
+          <div class="locked-track-info">
+            <h3><span>🔒</span> Track 4: Finite State Machines</h3>
+            <p>From traffic controllers to neural packet parsers</p>
+          </div>
+          <span class="lock-pill">Preview</span>
+        </div>
+
+        <div class="locked-track-card" onclick="openTrackPreview(5)">
+          <div class="locked-track-info">
+            <h3><span>🔒</span> Track 5: Pipelining &amp; Timing</h3>
+            <p>Breaking critical paths to hit high clock frequencies</p>
+          </div>
+          <span class="lock-pill">Preview</span>
+        </div>
+
+        <div class="locked-track-card" onclick="openTrackPreview(6)">
+          <div class="locked-track-info">
+            <h3><span>🔒</span> Track 6: Fixed-Point DSP</h3>
+            <p>Signed Q-format math, saturation &amp; quantization</p>
+          </div>
+          <span class="lock-pill">Preview</span>
+        </div>
+
+        <div class="locked-track-card badge-card" onclick="openTrackPreview(7)">
+          <div class="locked-track-info">
+            <h3><span>🏆</span> Final Project: RTL Moving-Average Filter</h3>
+            <p>Conditioning noisy sEMG &amp; neural spike signals in silicon</p>
+          </div>
+          <span class="lock-pill" style="color:#fbbf24;border-color:rgba(245,158,11,0.4);">Capstone</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- LESSON PLAYER VIEW -->
+  <div id="lessonView" class="lesson-view">
+    <div class="lesson-top-bar">
+      <button class="close-btn" onclick="exitLesson()" aria-label="Exit Lesson">✕</button>
+      <div class="step-progress-track">
+        <div id="lessonStepProgress" class="step-progress-fill" style="width: 20%;"></div>
+      </div>
+      <div id="lessonStepCounter" class="step-counter-label">1 / 5</div>
+    </div>
+
+    <div id="lessonStage" class="lesson-stage"></div>
+
+    <div id="lessonFooter" class="lesson-footer">
+      <div id="feedbackMsg" class="feedback-msg">
+        <div id="feedbackTitle" class="feedback-title"></div>
+        <div id="feedbackDetail"></div>
+      </div>
+      <button id="primaryActionBtn" class="primary-action-btn" onclick="handlePrimaryAction()">Continue</button>
+    </div>
+  </div>
+
+  <!-- LESSON COMPLETE VIEW -->
+  <div id="completeView" class="complete-screen">
+    <div class="trophy-circle">⚡</div>
+    <h2 style="font-size:26px;font-weight:900;">Rep Complete!</h2>
+    <p id="completeLessonName" style="color:var(--text-secondary);max-width:320px;">
+      You mastered Wires &amp; Signals. One rep a day builds real silicon intuition.
+    </p>
+    <div class="reward-pills">
+      <div class="reward-card">
+        <div class="reward-val">+25 XP</div>
+        <div class="reward-lbl">Earned</div>
+      </div>
+      <div class="reward-card">
+        <div id="completeStreakVal" class="reward-val" style="color:#fbbf24;">1 Day</div>
+        <div class="reward-lbl">Active Streak</div>
+      </div>
+    </div>
+    <button class="primary-action-btn" style="max-width:320px;margin-top:12px;" onclick="returnHome()">Back to Path</button>
+  </div>
+</div>
+
+<!-- INFO MODAL -->
+<div id="infoModal" class="modal-backdrop" onclick="closeModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 id="modalTitle">Streak &amp; Zero-Guilt Pacing</h3>
+    <p id="modalBody"></p>
+    <button class="modal-close-btn" onclick="closeModal()">Got it</button>
+  </div>
+</div>
+
+<script>
+/**
+ * SiliconReps - Complete Track 1 Curriculum Data & Interactive SVG Engine
+ * Strict 5-Step Pedagogical Flow per Lesson:
+ *   Step 1: Drawn Circuit (visual-first plain language + SVG)
+ *   Step 2: Interactive Steppable Waveform (tap to advance clock/time, SVG lights up live)
+ *   Step 3: Predict-the-Waveform / Output Quiz (visual SVG choices)
+ *   Step 4: Match Code to Picture (SystemVerilog appears here for the first time)
+ *   Step 5: One Tiny Rep (tap-token SV completion + hardware/neurotech intuition)
+ */
+
+const LESSONS = [
+  {
+    id: "wires-signals",
+    number: 1,
+    title: "Wires and Signals",
+    subtitle: "0s, 1s, and voltage over time",
+    icon: "〰️",
+    step1: {
+      kicker: "Step 1 of 5 • See the Hardware",
+      heading: "A wire is a physical copper path",
+      body: "In digital hardware, a wire carries a voltage: Low (0V = logic 0) or High (e.g., 1.0V = logic 1). When we watch that wire's 0s and 1s change over time, we call it a signal.",
+      renderCircuit: () => `
+        <svg class="hardware-svg" viewBox="0 0 360 150">
+          <!-- Driver Chip -->
+          <rect x="20" y="35" width="90" height="80" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="65" y="70" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">Sensor</text>
+          <text x="65" y="88" fill="#94a3b8" font-size="11" text-anchor="middle">Driver</text>
+
+          <!-- Copper Wire -->
+          <line x1="110" y1="75" x2="250" y2="75" stroke="#10b981" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="180" cy="75" r="5" fill="#10b981"/>
+          <rect x="142" y="38" width="76" height="24" rx="6" fill="rgba(16,185,129,0.16)" stroke="#10b981"/>
+          <text x="180" y="54" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">sig = 1 (High)</text>
+
+          <!-- Receiver Chip -->
+          <rect x="250" y="35" width="90" height="80" rx="12" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+          <text x="295" y="70" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">Receiver</text>
+          <text x="295" y="88" fill="#94a3b8" font-size="11" text-anchor="middle">Reads 1</text>
+        </svg>
+      `
+    },
+    step2: {
+      kicker: "Step 2 of 5 • Step Through Time",
+      heading: "Tap to advance time along the wire",
+      body: "Watch how the wire lights up green when the signal is 1 and goes dark grey when it drops to 0. A waveform is just a timeline of the wire's voltage.",
+      ticks: 6,
+      btnLabel: "Advance Time (+1 ns)",
+      getCaption: (t) => {
+        const vals = [0, 1, 1, 0, 1, 0];
+        return vals[t] === 1
+          ? `t = ${t}ns: Wire voltage is HIGH (1). Current charges the line.`
+          : `t = ${t}ns: Wire voltage is LOW (0). Line is pulled to ground.`;
+      },
+      renderInteractive: (t) => {
+        const vals = [0, 1, 1, 0, 1, 0];
+        const v = vals[t];
+        const wireCol = v ? "#10b981" : "#475569";
+        const wavePts = [
+          [40, 145], [85, 145], [85, 110], [130, 110], [175, 110],
+          [175, 145], [220, 145], [220, 110], [265, 110], [265, 145], [310, 145]
+        ];
+        const cursorX = 40 + t * 45 + 22;
+        return `
+          <svg class="hardware-svg" viewBox="0 0 360 175">
+            <!-- Circuit Top -->
+            <rect x="24" y="16" width="76" height="46" rx="10" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+            <text x="62" y="43" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">Driver</text>
+
+            <line x1="100" y1="39" x2="260" y2="39" stroke="${wireCol}" stroke-width="6" stroke-linecap="round"/>
+            <text x="180" y="26" fill="${v ? '#34d399' : '#94a3b8'}" font-size="12" font-weight="bold" text-anchor="middle">sig = ${v}</text>
+
+            <rect x="260" y="16" width="76" height="46" rx="10" fill="#1e293b" stroke="${wireCol}" stroke-width="2"/>
+            <text x="298" y="43" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">Input</text>
+
+            <!-- Waveform Bottom -->
+            <line x1="35" y1="95" x2="35" y2="155" stroke="#334155" stroke-width="1.5"/>
+            <text x="24" y="114" fill="#34d399" font-size="11" font-weight="bold">1</text>
+            <text x="24" y="148" fill="#94a3b8" font-size="11" font-weight="bold">0</text>
+
+            <polyline fill="none" stroke="#10b981" stroke-width="3"
+              points="${wavePts.map(p => p.join(',')).join(' ')}"/>
+
+            <!-- Time Cursor -->
+            <rect x="${cursorX - 18}" y="95" width="36" height="60" rx="4" fill="rgba(56,189,248,0.16)" stroke="#38bdf8" stroke-dasharray="3 2"/>
+            <text x="${cursorX}" y="168" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">t=${t}</text>
+          </svg>
+        `;
+      }
+    },
+    step3: {
+      kicker: "Step 3 of 5 • Predict the Signal",
+      heading: "Which waveform shows: 1, then 0, then 1?",
+      body: "Read the trace from left to right. High is 1, Low is 0.",
+      options: [
+        {
+          id: "a",
+          label: "Waveform A",
+          correct: true,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 54">
+            <text x="8" y="18" fill="#34d399" font-size="10">1</text>
+            <text x="8" y="44" fill="#64748b" font-size="10">0</text>
+            <polyline fill="none" stroke="#10b981" stroke-width="3" points="26,14 100,14 100,42 180,42 180,14 260,14"/>
+          </svg>`
+        },
+        {
+          id: "b",
+          label: "Waveform B",
+          correct: false,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 54">
+            <text x="8" y="18" fill="#34d399" font-size="10">1</text>
+            <text x="8" y="44" fill="#64748b" font-size="10">0</text>
+            <polyline fill="none" stroke="#38bdf8" stroke-width="3" points="26,42 100,42 100,14 180,14 180,42 260,42"/>
+          </svg>`
+        }
+      ],
+      explanation: "Spot on! Waveform A starts high (1), drops low (0) in the middle, and jumps back to high (1)."
+    },
+    step4: {
+      kicker: "Step 4 of 5 • Connect Picture to Code",
+      heading: "How do we declare a wire in SystemVerilog?",
+      body: "In SystemVerilog, the keyword 'logic' creates a signal wire that can hold a 0 or 1. Which snippet matches a single wire named 'spike_det'?",
+      visualSvg: `
+        <svg class="hardware-svg" viewBox="0 0 340 70">
+          <rect x="16" y="15" width="84" height="40" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="58" y="39" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">Detector</text>
+          <line x1="100" y1="35" x2="290" y2="35" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>
+          <text x="195" y="23" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">spike_det</text>
+        </svg>
+      `,
+      options: [
+        {
+          id: "a",
+          label: "Declares a 1-bit signal wire",
+          correct: true,
+          code: `<span class="sv-type">logic</span> spike_det;`
+        },
+        {
+          id: "b",
+          label: "Declares a floating-point decimal",
+          correct: false,
+          code: `<span class="sv-kw">float</span> spike_det = 3.14;`
+        }
+      ],
+      explanation: "Yes! 'logic' is SystemVerilog's go-to type for digital signals (0 or 1)."
+    },
+    step5: {
+      kicker: "Step 5 of 5 • One Tiny Rep",
+      heading: "Declare a 1-bit signal wire",
+      body: "Tap the tokens below to declare a wire named 'pulse_in' and drive it to 1.",
+      codeTemplate: [
+        { type: "blank", index: 0 },
+        { type: "text", val: " pulse_in;\n" },
+        { type: "kw", val: "assign" },
+        { type: "text", val: " pulse_in = " },
+        { type: "blank", index: 1 },
+        { type: "text", val: ";" }
+      ],
+      tokens: ["logic", "1'b1", "int", "1'b0"],
+      answer: ["logic", "1'b1"],
+      hwNote: "Silicon & Neurotech Link: In a neural spike detector, a 1-bit 'spike_det' wire flags the exact microsecond an action potential crosses threshold—using almost zero power."
+    }
+  },
+
+  {
+    id: "the-clock",
+    number: 2,
+    title: "The Clock",
+    subtitle: "Hardware's steady heartbeat",
+    icon: "⏱️",
+    step1: {
+      kicker: "Step 1 of 5 • See the Hardware",
+      heading: "The clock is a metronome for millions of gates",
+      body: "Without a conductor, signals arrive at messy, unpredictable times. A clock ('clk') is a steady square wave that ticks 0 → 1 → 0 forever. The exact moment it jumps from 0 to 1 is called the Rising Edge.",
+      renderCircuit: () => `
+        <svg class="hardware-svg" viewBox="0 0 360 155">
+          <!-- Oscillator -->
+          <rect x="20" y="38" width="95" height="75" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+          <text x="67" y="72" fill="#fbbf24" font-size="13" font-weight="bold" text-anchor="middle">Crystal</text>
+          <text x="67" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Clock Gen</text>
+
+          <!-- Clock Trace -->
+          <line x1="115" y1="75" x2="210" y2="75" stroke="#f59e0b" stroke-width="5"/>
+          <text x="162" y="62" fill="#fbbf24" font-size="12" font-weight="bold" text-anchor="middle">clk</text>
+
+          <!-- Square Wave Callout -->
+          <rect x="210" y="25" width="130" height="100" rx="12" fill="#0f172a" stroke="#334155"/>
+          <polyline fill="none" stroke="#f59e0b" stroke-width="3"
+            points="225,100 250,100 250,50 285,50 285,100 320,100"/>
+          <!-- Rising Edge Arrow -->
+          <circle cx="250" cy="75" r="6" fill="#38bdf8"/>
+          <text x="278" y="39" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">Rising Edge ↑</text>
+        </svg>
+      `
+    },
+    step2: {
+      kicker: "Step 2 of 5 • Step Through Time",
+      heading: "Step through 3 clock cycles",
+      body: "Tap 'Pulse Clock' to watch the clock rise (0 → 1) and fall (1 → 0). Notice how rising edges are highlighted in cyan—that's when synchronous hardware acts!",
+      ticks: 6,
+      btnLabel: "Pulse Clock",
+      getCaption: (t) => {
+        const msgs = [
+          "Cycle 0 Low: clk = 0. Circuits are waiting quietly.",
+          "RISING EDGE ↑ (0 → 1): Action moment! Hardware snapshots data.",
+          "Cycle 1 Low: clk = 0. Signals prepare for the next beat.",
+          "RISING EDGE ↑ (0 → 1): Second beat! Everything advances in lockstep.",
+          "Cycle 2 Low: clk = 0. Resting phase.",
+          "RISING EDGE ↑ (0 → 1): Third beat! Synchronized precision."
+        ];
+        return msgs[t];
+      },
+      renderInteractive: (t) => {
+        const isHigh = t % 2 === 1;
+        const pts = [
+          [40, 130], [85, 130], [85, 80], [130, 80], [130, 130],
+          [175, 130], [175, 80], [220, 80], [220, 130],
+          [265, 130], [265, 80], [310, 80]
+        ];
+        const edgeX = [62, 85, 152, 175, 242, 265][t];
+        return `
+          <svg class="hardware-svg" viewBox="0 0 360 165">
+            <rect x="24" y="14" width="312" height="42" rx="10" fill="#1e293b" stroke="${isHigh ? '#f59e0b' : '#334155'}" stroke-width="2"/>
+            <text x="180" y="40" fill="${isHigh ? '#fbbf24' : '#94a3b8'}" font-size="14" font-weight="bold" text-anchor="middle">
+              ${isHigh ? '⚡ RISING EDGE! clk = 1' : 'clk = 0 (Waiting for edge)'}
+            </text>
+
+            <polyline fill="none" stroke="#f59e0b" stroke-width="3"
+              points="${pts.map(p => p.join(',')).join(' ')}"/>
+
+            <!-- Rising Edge Markers -->
+            <circle cx="85" cy="105" r="5" fill="#38bdf8"/>
+            <circle cx="175" cy="105" r="5" fill="#38bdf8"/>
+            <circle cx="265" cy="105" r="5" fill="#38bdf8"/>
+
+            <!-- Active Marker -->
+            <line x1="${edgeX}" y1="68" x2="${edgeX}" y2="145" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3"/>
+            <text x="${edgeX}" y="158" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">Step ${t}</text>
+          </svg>
+        `;
+      }
+    },
+    step3: {
+      kicker: "Step 3 of 5 • Predict the Edge",
+      heading: "How many rising edges (0 → 1) happen in this waveform?",
+      body: "Count only the vertical arrows jumping UP from 0 to 1.",
+      options: [
+        {
+          id: "a",
+          label: "2 Rising Edges",
+          correct: true,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 58">
+            <polyline fill="none" stroke="#f59e0b" stroke-width="3" points="20,46 60,46 60,16 115,16 115,46 170,46 170,16 225,16 225,46 260,46"/>
+          </svg>`
+        },
+        {
+          id: "b",
+          label: "4 Rising Edges",
+          correct: false,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 24">
+            <text x="10" y="16" fill="#94a3b8" font-size="12">Hint: Falling edges (1 → 0) don't count as rising edges!</text>
+          </svg>`
+        }
+      ],
+      explanation: "Correct! There are 2 upward jumps (rising edges) and 2 downward drops (falling edges)."
+    },
+    step4: {
+      kicker: "Step 4 of 5 • Connect Picture to Code",
+      heading: "How does SystemVerilog listen for a rising clock edge?",
+      body: "In SystemVerilog, 'posedge' stands for Positive Edge (0 → 1). Match the rising-edge arrow to the right syntax.",
+      visualSvg: `
+        <svg class="hardware-svg" viewBox="0 0 340 75">
+          <polyline fill="none" stroke="#f59e0b" stroke-width="3" points="60,55 150,55 150,20 260,20"/>
+          <circle cx="150" cy="38" r="7" fill="#38bdf8"/>
+          <text x="215" y="45" fill="#38bdf8" font-size="13" font-weight="bold">posedge clk</text>
+        </svg>
+      `,
+      options: [
+        {
+          id: "a",
+          label: "Triggers strictly on 0 → 1 transition",
+          correct: true,
+          code: `<span class="sv-kw">always_ff</span> @(<span class="sv-kw">posedge</span> clk)`
+        },
+        {
+          id: "b",
+          label: "Triggers on 1 → 0 falling transition",
+          correct: false,
+          code: `<span class="sv-kw">always_ff</span> @(<span class="sv-kw">negedge</span> clk)`
+        }
+      ],
+      explanation: "Exactly! 'posedge clk' tells the hardware to wake up only on the rising edge."
+    },
+    step5: {
+      kicker: "Step 5 of 5 • One Tiny Rep",
+      heading: "Build a rising-edge clock sensitivity header",
+      body: "Tap the tokens to trigger an 'always_ff' block on the rising edge of 'clk'.",
+      codeTemplate: [
+        { type: "blank", index: 0 },
+        { type: "text", val: " @(" },
+        { type: "blank", index: 1 },
+        { type: "text", val: " clk)" }
+      ],
+      tokens: ["always_ff", "posedge", "negedge", "assign"],
+      answer: ["always_ff", "posedge"],
+      hwNote: "Silicon & Neurotech Link: Neuralink's brain interface SoC runs on a crisp master clock so multi-channel ADC samples stay phase-aligned across hundreds of electrodes."
+    }
+  },
+
+  {
+    id: "the-register",
+    number: 3,
+    title: "The Register (Flip-Flop)",
+    subtitle: "Hardware memory that locks on the beat",
+    icon: "📦",
+    step1: {
+      kicker: "Step 1 of 5 • See the Hardware",
+      heading: "A register is a 1-bit camera",
+      body: "A D Flip-Flop (register) has a data input 'd', a clock 'clk', and a stored output 'q'. Even if 'd' wiggles wildly, 'q' ignores it—until a rising clock edge snaps a photo of 'd' and holds it steady.",
+      renderCircuit: () => `
+        <svg class="hardware-svg" viewBox="0 0 360 155">
+          <!-- Input d -->
+          <line x1="30" y1="55" x2="120" y2="55" stroke="#38bdf8" stroke-width="5"/>
+          <text x="65" y="43" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">d (input)</text>
+
+          <!-- Clock -->
+          <line x1="30" y1="110" x2="120" y2="110" stroke="#f59e0b" stroke-width="4"/>
+          <text x="65" y="98" fill="#fbbf24" font-size="13" font-weight="bold" text-anchor="middle">clk</text>
+
+          <!-- Flip Flop Box -->
+          <rect x="120" y="30" width="110" height="100" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+          <text x="135" y="60" fill="#f8fafc" font-size="14" font-weight="bold">D</text>
+          <text x="215" y="60" fill="#34d399" font-size="14" font-weight="bold" text-anchor="end">Q</text>
+          <!-- Clock Triangle -->
+          <polygon points="120,102 134,110 120,118" fill="none" stroke="#f59e0b" stroke-width="2"/>
+          <text x="175" y="88" fill="#94a3b8" font-size="11" text-anchor="middle">Stores 1 bit</text>
+
+          <!-- Output q -->
+          <line x1="230" y1="55" x2="330" y2="55" stroke="#10b981" stroke-width="5"/>
+          <text x="285" y="43" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">q (saved)</text>
+        </svg>
+      `
+    },
+    step2: {
+      kicker: "Step 2 of 5 • Step Through Time",
+      heading: "See how 'q' ignores 'd' until the clock edge",
+      body: "Notice at Step 1 that 'd' changes to 1, yet 'q' stays 0! Only at Step 2 (the rising clock edge) does 'q' copy 'd'.",
+      ticks: 5,
+      btnLabel: "Advance Time",
+      getCaption: (t) => {
+        const captions = [
+          "t=0: d=0, clk=0. Register holds q=0.",
+          "t=1: d jumps to 1! Because clk is still 0, q stays 0 (locked).",
+          "t=2: RISING EDGE ↑! Register samples d=1, so q updates to 1!",
+          "t=3: d drops to 0, clk=0. Register remembers q=1!",
+          "t=4: RISING EDGE ↑! Register samples d=0, so q updates to 0."
+        ];
+        return captions[t];
+      },
+      renderInteractive: (t) => {
+        const dArr =   [0, 1, 1, 0, 0];
+        const clkArr = [0, 0, 1, 0, 1];
+        const qArr =   [0, 0, 1, 1, 0];
+        const d = dArr[t], clk = clkArr[t], q = qArr[t];
+        return `
+          <svg class="hardware-svg" viewBox="0 0 360 185">
+            <!-- Top Schematic -->
+            <line x1="28" y1="36" x2="125" y2="36" stroke="${d ? '#38bdf8' : '#475569'}" stroke-width="5"/>
+            <text x="75" y="25" fill="${d ? '#38bdf8' : '#94a3b8'}" font-size="12" font-weight="bold" text-anchor="middle">d = ${d}</text>
+
+            <line x1="28" y1="74" x2="125" y2="74" stroke="${clk ? '#f59e0b' : '#475569'}" stroke-width="4"/>
+            <text x="75" y="64" fill="${clk ? '#fbbf24' : '#94a3b8'}" font-size="12" font-weight="bold" text-anchor="middle">clk = ${clk} ${clk ? '↑' : ''}</text>
+
+            <rect x="125" y="16" width="100" height="72" rx="10" fill="#1e293b" stroke="${clk ? '#f59e0b' : '#10b981'}" stroke-width="2.5"/>
+            <text x="175" y="56" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">FF [ ${q} ]</text>
+
+            <line x1="225" y1="36" x2="332" y2="36" stroke="${q ? '#10b981' : '#475569'}" stroke-width="5"/>
+            <text x="280" y="25" fill="${q ? '#34d399' : '#94a3b8'}" font-size="12" font-weight="bold" text-anchor="middle">q = ${q}</text>
+
+            <!-- Waveforms -->
+            <text x="12" y="114" fill="#fbbf24" font-size="10" font-weight="bold">clk</text>
+            <polyline fill="none" stroke="#f59e0b" stroke-width="2.5" points="45,118 145,118 145,100 195,100 195,118 245,118 245,100 310,100"/>
+
+            <text x="12" y="142" fill="#38bdf8" font-size="10" font-weight="bold">d</text>
+            <polyline fill="none" stroke="#38bdf8" stroke-width="2.5" points="45,146 95,146 95,128 195,128 195,146 310,146"/>
+
+            <text x="12" y="170" fill="#34d399" font-size="10" font-weight="bold">q</text>
+            <polyline fill="none" stroke="#10b981" stroke-width="3" points="45,174 145,174 145,156 245,156 245,174 310,174"/>
+
+            <!-- Step Highlight -->
+            <rect x="${45 + t * 50}" y="94" width="50" height="86" fill="rgba(255,255,255,0.07)" stroke="#94a3b8" stroke-dasharray="2 2"/>
+          </svg>
+        `;
+      }
+    },
+    step3: {
+      kicker: "Step 3 of 5 • Predict the Output",
+      heading: "Input 'd' turns 1 BEFORE the rising clock edge. When does 'q' turn 1?",
+      body: "Remember: a D flip-flop only updates on the rising edge of clk.",
+      options: [
+        {
+          id: "a",
+          label: "At the rising clock edge (dotted line)",
+          correct: true,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 56">
+            <line x1="150" y1="6" x2="150" y2="52" stroke="#f59e0b" stroke-dasharray="3 2"/>
+            <text x="150" y="14" fill="#fbbf24" font-size="9" text-anchor="middle">clk ↑</text>
+            <polyline fill="none" stroke="#10b981" stroke-width="3" points="30,46 150,46 150,22 250,22"/>
+          </svg>`
+        },
+        {
+          id: "b",
+          label: "Immediately when 'd' changes",
+          correct: false,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 56">
+            <line x1="150" y1="6" x2="150" y2="52" stroke="#f59e0b" stroke-dasharray="3 2"/>
+            <polyline fill="none" stroke="#38bdf8" stroke-width="3" points="30,46 80,46 80,22 250,22"/>
+          </svg>`
+        }
+      ],
+      explanation: "Nailed it! 'q' waits patiently until the rising clock edge arrives at the dotted line."
+    },
+    step4: {
+      kicker: "Step 4 of 5 • Connect Picture to Code",
+      heading: "Which SystemVerilog block describes a flip-flop?",
+      body: "In 'always_ff', we use non-blocking assignment ('<=') to show that 'q' updates on the clock edge.",
+      visualSvg: `
+        <svg class="hardware-svg" viewBox="0 0 340 72">
+          <line x1="50" y1="36" x2="125" y2="36" stroke="#38bdf8" stroke-width="4"/>
+          <text x="85" y="26" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">d</text>
+          <rect x="125" y="14" width="90" height="44" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+          <text x="170" y="40" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">posedge clk</text>
+          <line x1="215" y1="36" x2="290" y2="36" stroke="#10b981" stroke-width="4"/>
+          <text x="255" y="26" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">q</text>
+        </svg>
+      `,
+      options: [
+        {
+          id: "a",
+          label: "Clocked flip-flop with <=",
+          correct: true,
+          code: `<span class="sv-kw">always_ff</span> @(<span class="sv-kw">posedge</span> clk) <span class="sv-kw">begin</span>\n  q <span class="sv-op">&lt;=</span> d;\n<span class="sv-kw">end</span>`
+        },
+        {
+          id: "b",
+          label: "Continuous wire without a clock",
+          correct: false,
+          code: `<span class="sv-kw">assign</span> q = d;`
+        }
+      ],
+      explanation: "Yes! 'always_ff @(posedge clk)' with '<=' synthesizes directly into a hardware D flip-flop."
+    },
+    step5: {
+      kicker: "Step 5 of 5 • One Tiny Rep",
+      heading: "Complete the D Flip-Flop RTL",
+      body: "Tap the tokens to capture input 'd' into register 'q' on the rising clock edge.",
+      codeTemplate: [
+        { type: "kw", val: "always_ff" },
+        { type: "text", val: " @(" },
+        { type: "blank", index: 0 },
+        { type: "text", val: " clk)\n  q " },
+        { type: "blank", index: 1 },
+        { type: "text", val: " d;" }
+      ],
+      tokens: ["posedge", "<=", "=", "always_comb"],
+      answer: ["posedge", "<="],
+      hwNote: "Silicon & Neurotech Link: Flip-flops hold each sample of an sEMG muscle signal steady while arithmetic blocks compute the next filter tap."
+    }
+  },
+
+  {
+    id: "combinational-logic",
+    number: 4,
+    title: "Combinational Logic",
+    subtitle: "Gates react immediately—no memory",
+    icon: "⚡",
+    step1: {
+      kicker: "Step 1 of 5 • See the Hardware",
+      heading: "Logic gates have zero memory",
+      body: "An AND gate outputs 1 only when BOTH inputs (a AND b) are 1. There is no clock here—if an input changes, the output reacts almost instantaneously (within picoseconds).",
+      renderCircuit: () => `
+        <svg class="hardware-svg" viewBox="0 0 360 150">
+          <!-- Input a -->
+          <line x1="35" y1="52" x2="130" y2="52" stroke="#10b981" stroke-width="5"/>
+          <text x="75" y="40" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">a = 1</text>
+
+          <!-- Input b -->
+          <line x1="35" y1="98" x2="130" y2="98" stroke="#10b981" stroke-width="5"/>
+          <text x="75" y="86" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">b = 1</text>
+
+          <!-- AND Gate Body -->
+          <path d="M 130 32 L 175 32 A 43 43 0 0 1 175 118 L 130 118 Z"
+            fill="#1e293b" stroke="#38bdf8" stroke-width="2.5"/>
+          <text x="168" y="80" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">AND</text>
+
+          <!-- Output y -->
+          <line x1="218" y1="75" x2="325" y2="75" stroke="#10b981" stroke-width="5"/>
+          <text x="275" y="62" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">y = 1 (a &amp; b)</text>
+        </svg>
+      `
+    },
+    step2: {
+      kicker: "Step 2 of 5 • Step Through Inputs",
+      heading: "Test all 4 input combinations of an AND gate",
+      body: "Tap 'Next Input Pair' to watch how 'y' responds right away with no clock required.",
+      ticks: 4,
+      btnLabel: "Next Input Pair",
+      getCaption: (t) => {
+        const pairs = [
+          "a=0, b=0 → y=0 (Neither input is 1)",
+          "a=1, b=0 → y=0 (Only 'a' is 1; AND needs both)",
+          "a=0, b=1 → y=0 (Only 'b' is 1; AND needs both)",
+          "a=1, b=1 → y=1! Both inputs are 1, so the output lights up immediately!"
+        ];
+        return pairs[t];
+      },
+      renderInteractive: (t) => {
+        const combos = [[0,0,0], [1,0,0], [0,1,0], [1,1,1]];
+        const [a, b, y] = combos[t];
+        return `
+          <svg class="hardware-svg" viewBox="0 0 360 145">
+            <line x1="35" y1="48" x2="130" y2="48" stroke="${a ? '#10b981' : '#475569'}" stroke-width="5"/>
+            <text x="75" y="36" fill="${a ? '#34d399' : '#94a3b8'}" font-size="13" font-weight="bold" text-anchor="middle">a = ${a}</text>
+
+            <line x1="35" y1="96" x2="130" y2="96" stroke="${b ? '#10b981' : '#475569'}" stroke-width="5"/>
+            <text x="75" y="84" fill="${b ? '#34d399' : '#94a3b8'}" font-size="13" font-weight="bold" text-anchor="middle">b = ${b}</text>
+
+            <path d="M 130 28 L 175 28 A 44 44 0 0 1 175 116 L 130 116 Z"
+              fill="#1e293b" stroke="${y ? '#10b981' : '#38bdf8'}" stroke-width="2.5"/>
+            <text x="168" y="77" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">AND</text>
+
+            <line x1="219" y1="72" x2="325" y2="72" stroke="${y ? '#10b981' : '#475569'}" stroke-width="5"/>
+            <text x="275" y="58" fill="${y ? '#34d399' : '#94a3b8'}" font-size="13" font-weight="bold" text-anchor="middle">y = ${y}</text>
+          </svg>
+        `;
+      }
+    },
+    step3: {
+      kicker: "Step 3 of 5 • Predict the Output",
+      heading: "If 'a' is 1 and 'b' is 0, what does an OR gate output?",
+      body: "An OR gate outputs 1 if AT LEAST ONE input is 1.",
+      options: [
+        {
+          id: "a",
+          label: "y = 1 (because at least one input is 1)",
+          correct: true,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 42">
+            <rect x="10" y="6" width="260" height="30" rx="6" fill="rgba(16,185,129,0.14)" stroke="#10b981"/>
+            <text x="140" y="25" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">1 OR 0 = 1</text>
+          </svg>`
+        },
+        {
+          id: "b",
+          label: "y = 0 (needs both inputs to be 1)",
+          correct: false,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 42">
+            <rect x="10" y="6" width="260" height="30" rx="6" fill="rgba(71,85,105,0.2)" stroke="#475569"/>
+            <text x="140" y="25" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">1 OR 0 = 0</text>
+          </svg>`
+        }
+      ],
+      explanation: "Right! OR outputs 1 whenever 'a' OR 'b' (or both) is 1."
+    },
+    step4: {
+      kicker: "Step 4 of 5 • Connect Picture to Code",
+      heading: "How do we wire an AND gate in SystemVerilog?",
+      body: "Continuous assignment ('assign') connects combinational gates directly to wires. '&' is bitwise AND.",
+      visualSvg: `
+        <svg class="hardware-svg" viewBox="0 0 340 76">
+          <line x1="40" y1="26" x2="120" y2="26" stroke="#38bdf8" stroke-width="4"/>
+          <text x="75" y="18" fill="#38bdf8" font-size="11" font-weight="bold">valid</text>
+          <line x1="40" y1="52" x2="120" y2="52" stroke="#38bdf8" stroke-width="4"/>
+          <text x="75" y="68" fill="#38bdf8" font-size="11" font-weight="bold">enable</text>
+          <path d="M 120 14 L 155 14 A 25 25 0 0 1 155 64 L 120 64 Z" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+          <text x="148" y="43" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">&amp;</text>
+          <line x1="180" y1="39" x2="290" y2="39" stroke="#10b981" stroke-width="4"/>
+          <text x="235" y="29" fill="#34d399" font-size="11" font-weight="bold" text-anchor="middle">fire</text>
+        </svg>
+      `,
+      options: [
+        {
+          id: "a",
+          label: "Continuous combinational AND",
+          correct: true,
+          code: `<span class="sv-kw">assign</span> fire = valid <span class="sv-op">&amp;</span> enable;`
+        },
+        {
+          id: "b",
+          label: "Clocked flip-flop assignment",
+          correct: false,
+          code: `<span class="sv-kw">always_ff</span> @(<span class="sv-kw">posedge</span> clk)\n  fire <span class="sv-op">&lt;=</span> valid;`
+        }
+      ],
+      explanation: "Spot on! 'assign fire = valid & enable;' creates an unclocked hardware AND gate."
+    },
+    step5: {
+      kicker: "Step 5 of 5 • One Tiny Rep",
+      heading: "Wire up a combinational AND gate",
+      body: "Tap the tokens so 'trig_out' equals 'over_thresh' AND 'armed'.",
+      codeTemplate: [
+        { type: "blank", index: 0 },
+        { type: "text", val: " trig_out = over_thresh " },
+        { type: "blank", index: 1 },
+        { type: "text", val: " armed;" }
+      ],
+      tokens: ["assign", "&", "|", "posedge"],
+      answer: ["assign", "&"],
+      hwNote: "Silicon & Neurotech Link: Gating a neural stimulator pulse with 'over_thresh & armed' in combinational hardware ensures a safety interlock reacts in nanoseconds without waiting for software."
+    }
+  },
+
+  {
+    id: "comb-vs-seq",
+    number: 5,
+    title: "Combinational vs Sequential",
+    subtitle: "Instant reaction vs clocked memory",
+    icon: "⚖️",
+    step1: {
+      kicker: "Step 1 of 5 • See the Big Picture",
+      heading: "Every digital chip is a sandwich of these two",
+      body: "Combinational logic (clouds of gates) computes answers immediately, like a calculator. Sequential logic (registers/flip-flops) freezes those answers on clock edges so we can use them on the next beat.",
+      renderCircuit: () => `
+        <svg class="hardware-svg" viewBox="0 0 360 155">
+          <!-- Input -->
+          <line x1="18" y1="75" x2="65" y2="75" stroke="#38bdf8" stroke-width="4"/>
+          <text x="40" y="63" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">in</text>
+
+          <!-- Combinational Cloud -->
+          <rect x="65" y="35" width="105" height="80" rx="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5 3"/>
+          <text x="117" y="70" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">Comb Logic</text>
+          <text x="117" y="88" fill="#94a3b8" font-size="10" text-anchor="middle">Instant (No clk)</text>
+
+          <!-- Middle Wire -->
+          <line x1="170" y1="75" x2="215" y2="75" stroke="#10b981" stroke-width="4"/>
+
+          <!-- Sequential Box -->
+          <rect x="215" y="35" width="95" height="80" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+          <text x="262" y="70" fill="#fbbf24" font-size="12" font-weight="bold" text-anchor="middle">Register</text>
+          <text x="262" y="88" fill="#94a3b8" font-size="10" text-anchor="middle">Saves on clk ↑</text>
+
+          <!-- Output -->
+          <line x1="310" y1="75" x2="345" y2="75" stroke="#10b981" stroke-width="4"/>
+          <text x="328" y="63" fill="#34d399" font-size="11" font-weight="bold" text-anchor="middle">out</text>
+        </svg>
+      `
+    },
+    step2: {
+      kicker: "Step 2 of 5 • Compare Side-by-Side",
+      heading: "Watch 'y_comb' vs 'y_seq' when input 'a' flips",
+      body: "Both circuits invert input 'a' (NOT gate). See how 'y_comb' flips immediately at t=1, while 'y_seq' waits until the clock edge at t=2!",
+      ticks: 4,
+      btnLabel: "Step Comparison",
+      getCaption: (t) => {
+        const msgs = [
+          "t=0: Input a=0. Both inverted outputs are 1.",
+          "t=1: Input 'a' becomes 1 (clk=0). y_comb drops to 0 IMMEDIATELY! y_seq stays 1.",
+          "t=2: RISING CLOCK EDGE ↑! Now y_seq captures the new 0.",
+          "t=3: Steady state. Both outputs now agree at 0."
+        ];
+        return msgs[t];
+      },
+      renderInteractive: (t) => {
+        const aArr    = [0, 1, 1, 1];
+        const clkArr  = [0, 0, 1, 0];
+        const combArr = [1, 0, 0, 0];
+        const seqArr  = [1, 1, 0, 0];
+        const a = aArr[t], clk = clkArr[t], yc = combArr[t], ys = seqArr[t];
+        return `
+          <svg class="hardware-svg" viewBox="0 0 360 165">
+            <!-- Top Path: Combinational -->
+            <text x="16" y="24" fill="#38bdf8" font-size="11" font-weight="bold">1. Combinational (No Clock)</text>
+            <line x1="20" y1="45" x2="110" y2="45" stroke="${a ? '#10b981' : '#475569'}" stroke-width="4"/>
+            <text x="60" y="37" fill="#cbd5e1" font-size="11" text-anchor="middle">a=${a}</text>
+            <rect x="110" y="30" width="75" height="30" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <text x="147" y="49" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">NOT (~a)</text>
+            <line x1="185" y1="45" x2="335" y2="45" stroke="${yc ? '#10b981' : '#475569'}" stroke-width="4"/>
+            <text x="260" y="37" fill="${yc ? '#34d399' : '#94a3b8'}" font-size="12" font-weight="bold" text-anchor="middle">y_comb = ${yc}</text>
+
+            <!-- Divider -->
+            <line x1="16" y1="82" x2="344" y2="82" stroke="#263554" stroke-dasharray="4 4"/>
+
+            <!-- Bottom Path: Sequential -->
+            <text x="16" y="104" fill="#fbbf24" font-size="11" font-weight="bold">2. Sequential (Clocked Flip-Flop) — clk=${clk} ${clk ? '↑' : ''}</text>
+            <line x1="20" y1="128" x2="110" y2="128" stroke="${a ? '#10b981' : '#475569'}" stroke-width="4"/>
+            <rect x="110" y="113" width="75" height="30" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <text x="147" y="132" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">NOT (~a)</text>
+            <line x1="185" y1="128" x2="215" y2="128" stroke="${yc ? '#10b981' : '#475569'}" stroke-width="4"/>
+            <rect x="215" y="110" width="48" height="36" rx="6" fill="#1e293b" stroke="${clk ? '#f59e0b' : '#64748b'}" stroke-width="2"/>
+            <text x="239" y="132" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">FF</text>
+            <line x1="263" y1="128" x2="335" y2="128" stroke="${ys ? '#10b981' : '#475569'}" stroke-width="4"/>
+            <text x="300" y="118" fill="${ys ? '#34d399' : '#94a3b8'}" font-size="12" font-weight="bold" text-anchor="middle">y_seq = ${ys}</text>
+          </svg>
+        `;
+      }
+    },
+    step3: {
+      kicker: "Step 3 of 5 • Classify the Behavior",
+      heading: "A circuit outputs 1 ONLY when a button is currently held down, and forgets the moment you let go.",
+      body: "Does this circuit have memory (sequential) or no memory (combinational)?",
+      options: [
+        {
+          id: "a",
+          label: "Combinational (reacts to current input only)",
+          correct: true,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 38">
+            <text x="140" y="23" fill="#38bdf8" font-size="12" font-weight="bold" text-anchor="middle">Output depends ONLY on present inputs</text>
+          </svg>`
+        },
+        {
+          id: "b",
+          label: "Sequential (remembers past button presses)",
+          correct: false,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 38">
+            <text x="140" y="23" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">Sequential circuits store state across clock cycles</text>
+          </svg>`
+        }
+      ],
+      explanation: "Exactly! If it forgets as soon as you let go, there is no flip-flop storing state—it's purely combinational."
+    },
+    step4: {
+      kicker: "Step 4 of 5 • Connect Picture to Code",
+      heading: "SystemVerilog separates these two worlds clearly",
+      body: "Use 'always_comb' (or 'assign') for instant logic, and 'always_ff' for clocked flip-flops. Which code matches the registered inverter?",
+      visualSvg: `
+        <svg class="hardware-svg" viewBox="0 0 340 72">
+          <line x1="30" y1="36" x2="95" y2="36" stroke="#38bdf8" stroke-width="4"/>
+          <text x="60" y="26" fill="#38bdf8" font-size="11" font-weight="bold">a</text>
+          <rect x="95" y="18" width="68" height="36" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="129" y="40" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">~a</text>
+          <line x1="163" y1="36" x2="195" y2="36" stroke="#10b981" stroke-width="4"/>
+          <rect x="195" y="16" width="66" height="40" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+          <text x="228" y="40" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">FF ↑</text>
+          <line x1="261" y1="36" x2="315" y2="36" stroke="#10b981" stroke-width="4"/>
+          <text x="290" y="26" fill="#34d399" font-size="11" font-weight="bold">y_seq</text>
+        </svg>
+      `,
+      options: [
+        {
+          id: "a",
+          label: "Updates y_seq on posedge clk",
+          correct: true,
+          code: `<span class="sv-kw">always_ff</span> @(<span class="sv-kw">posedge</span> clk)\n  y_seq <span class="sv-op">&lt;=</span> <span class="sv-op">~</span>a;`
+        },
+        {
+          id: "b",
+          label: "Updates immediately without a clock",
+          correct: false,
+          code: `<span class="sv-kw">always_comb</span>\n  y_seq = <span class="sv-op">~</span>a;`
+        }
+      ],
+      explanation: "Yes! 'always_ff' explicitly tells the compiler to synthesize a flip-flop after the NOT gate."
+    },
+    step5: {
+      kicker: "Step 5 of 5 • One Tiny Rep",
+      heading: "Write a combinational block vs a sequential block",
+      body: "Tap the keywords to make 'comb_out' combinational and 'seq_out' clocked.",
+      codeTemplate: [
+        { type: "blank", index: 0 },
+        { type: "text", val: " comb_out = a | b;\n\n" },
+        { type: "blank", index: 1 },
+        { type: "text", val: " @(posedge clk)\n  seq_out <= a | b;" }
+      ],
+      tokens: ["always_comb", "always_ff", "posedge", "logic"],
+      answer: ["always_comb", "always_ff"],
+      hwNote: "Silicon & Neurotech Link: Separating 'always_comb' from 'always_ff' lets hardware synthesis tools check whether your DSP filter meets timing before it ever hits silicon."
+    }
+  },
+
+  {
+    id: "first-counter",
+    number: 6,
+    title: "Your First Counter",
+    subtitle: "Register + 1 loop counting clock edges",
+    icon: "🔢",
+    step1: {
+      kicker: "Step 1 of 5 • See the Hardware",
+      heading: "How does a chip count? A register looped through a +1 adder!",
+      body: "Take a multi-bit register holding 'count'. Feed 'count' into a combinational '+ 1' adder, and wire the sum right back into the register's input! On every rising clock edge, 'count' steps up by 1.",
+      renderCircuit: () => `
+        <svg class="hardware-svg" viewBox="0 0 360 165">
+          <!-- Register Box -->
+          <rect x="65" y="32" width="105" height="68" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+          <text x="117" y="62" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">Register</text>
+          <text x="117" y="80" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">count [3:0]</text>
+          <text x="42" y="86" fill="#fbbf24" font-size="11" font-weight="bold">clk ↑</text>
+          <line x1="48" y1="82" x2="65" y2="82" stroke="#f59e0b" stroke-width="3"/>
+
+          <!-- Output Line -->
+          <line x1="170" y1="66" x2="325" y2="66" stroke="#10b981" stroke-width="5"/>
+          <text x="285" y="54" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">count</text>
+
+          <!-- Feedback Branch Down -->
+          <circle cx="230" cy="66" r="5" fill="#38bdf8"/>
+          <polyline fill="none" stroke="#38bdf8" stroke-width="3.5"
+            points="230,66 230,132 195,132"/>
+
+          <!-- +1 Adder Block -->
+          <rect x="115" y="114" width="80" height="36" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="155" y="137" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">+ 1</text>
+
+          <!-- Feedback Back to Reg Input -->
+          <polyline fill="none" stroke="#38bdf8" stroke-width="3.5"
+            points="115,132 32,132 32,54 65,54"/>
+          <text x="18" y="44" fill="#38bdf8" font-size="10" font-weight="bold">count+1</text>
+        </svg>
+      `
+    },
+    step2: {
+      kicker: "Step 2 of 5 • Step Through Clock Edges",
+      heading: "Watch the feedback loop count from 0 to 4",
+      body: "Notice how the '+ 1' adder always prepares the NEXT value (count + 1) on the blue feedback wire, waiting for the next rising clock edge to lock it in.",
+      ticks: 5,
+      btnLabel: "Tick Rising Edge ↑",
+      getCaption: (t) => {
+        return `Clock Edge #${t}: Register outputs count = ${t}. The +1 adder already has ${t + 1} waiting at the input!`;
+      },
+      renderInteractive: (t) => {
+        const nextVal = t + 1;
+        return `
+          <svg class="hardware-svg" viewBox="0 0 360 175">
+            <!-- Register -->
+            <rect x="75" y="26" width="110" height="68" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+            <text x="130" y="54" fill="#94a3b8" font-size="11" text-anchor="middle">Saved Value</text>
+            <text x="130" y="77" fill="#34d399" font-size="20" font-weight="900" text-anchor="middle">count = ${t}</text>
+
+            <!-- Output -->
+            <line x1="185" y1="60" x2="330" y2="60" stroke="#10b981" stroke-width="5"/>
+            <text x="290" y="48" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">out: ${t}</text>
+
+            <!-- Feedback Loop -->
+            <circle cx="240" cy="60" r="5" fill="#38bdf8"/>
+            <polyline fill="none" stroke="#38bdf8" stroke-width="3.5" points="240,60 240,136 195,136"/>
+
+            <!-- Adder -->
+            <rect x="115" y="116" width="80" height="40" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <text x="155" y="141" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">${t} + 1</text>
+
+            <!-- Next Value Wire -->
+            <polyline fill="none" stroke="#38bdf8" stroke-width="3.5" points="115,136 32,136 32,60 75,60"/>
+            <rect x="6" y="16" width="62" height="24" rx="6" fill="rgba(56,189,248,0.16)" stroke="#38bdf8"/>
+            <text x="37" y="32" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">Next: ${nextVal}</text>
+          </svg>
+        `;
+      }
+    },
+    step3: {
+      kicker: "Step 3 of 5 • Predict the Counter",
+      heading: "If 'count' is currently 3 and 'rst' (reset) is 0, what will 'count' be right after the next rising clock edge?",
+      body: "Follow the feedback loop: current value + 1.",
+      options: [
+        {
+          id: "a",
+          label: "count = 4",
+          correct: true,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 38">
+            <text x="140" y="24" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">3 + 1 = 4 captured on posedge clk</text>
+          </svg>`
+        },
+        {
+          id: "b",
+          label: "count = 0",
+          correct: false,
+          svg: `<svg class="hardware-svg" viewBox="0 0 280 38">
+            <text x="140" y="24" fill="#94a3b8" font-size="13" font-weight="bold" text-anchor="middle">It only resets to 0 when rst == 1</text>
+          </svg>`
+        }
+      ],
+      explanation: "Awesome! Because reset is 0, the flip-flop captures 3 + 1 = 4 on the rising clock edge."
+    },
+    step4: {
+      kicker: "Step 4 of 5 • Connect Picture to Code",
+      heading: "How do we write a counter with a synchronous reset in SystemVerilog?",
+      body: "On 'posedge clk', if 'rst' is 1, we set 'count <= 0'. Otherwise, we add 1: 'count <= count + 1'.",
+      visualSvg: `
+        <svg class="hardware-svg" viewBox="0 0 340 72">
+          <rect x="90" y="14" width="160" height="44" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+          <text x="170" y="33" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">if (rst) 0 else count + 1</text>
+          <text x="170" y="49" fill="#fbbf24" font-size="10" text-anchor="middle">on posedge clk</text>
+        </svg>
+      `,
+      options: [
+        {
+          id: "a",
+          label: "Clocked counter with reset",
+          correct: true,
+          code: `<span class="sv-kw">always_ff</span> @(<span class="sv-kw">posedge</span> clk) <span class="sv-kw">begin</span>\n  <span class="sv-kw">if</span> (rst) count <span class="sv-op">&lt;=</span> 4'd0;\n  <span class="sv-kw">else</span>     count <span class="sv-op">&lt;=</span> count + 4'd1;\n<span class="sv-kw">end</span>`
+        },
+        {
+          id: "b",
+          label: "Combinational loop (infinite oscillation!)",
+          correct: false,
+          code: `<span class="sv-kw">assign</span> count = count + 4'd1;`
+        }
+      ],
+      explanation: "Crucial insight! Without a flip-flop in the loop, 'count = count + 1' would race uncontrollably."
+    },
+    step5: {
+      kicker: "Step 5 of 5 • One Tiny Rep",
+      heading: "Finish your first hardware counter",
+      body: "Tap the tokens to reset 'count' to 0 when 'rst' is high, and increment by 1 otherwise.",
+      codeTemplate: [
+        { type: "kw", val: "always_ff" },
+        { type: "text", val: " @(posedge clk) " },
+        { type: "kw", val: "begin" },
+        { type: "text", val: "\n  " },
+        { type: "kw", val: "if" },
+        { type: "text", val: " (rst)\n    count <= " },
+        { type: "blank", index: 0 },
+        { type: "text", val: ";\n  " },
+        { type: "kw", val: "else" },
+        { type: "text", val: "\n    count <= count + " },
+        { type: "blank", index: 1 },
+        { type: "text", val: ";\n" },
+        { type: "kw", val: "end" }
+      ],
+      tokens: ["4'd0", "4'd1", "clk", "assign"],
+      answer: ["4'd0", "4'd1"],
+      hwNote: "Silicon & Neurotech Link: Counters generate exact sample-rate timers (e.g., 1 kHz sEMG or 20 kHz neural spike sampling) and track buffer addresses in hardware pipelines."
+    }
+  }
+];
+
+const TRACK_PREVIEWS = {
+  2: {
+    title: "Track 2: Combinational Circuits",
+    body: "Build data routers (Multiplexers), address Decoders, and Ripple-Carry Adders out of basic gates—and see how propagation delay sets speed limits."
+  },
+  3: {
+    title: "Track 3: Sequential Circuits",
+    body: "Chain flip-flops together into Shift Registers (the backbone of FIR filters!), add Clock Enables to save power, and master clean Reset strategies."
+  },
+  4: {
+    title: "Track 4: Finite State Machines",
+    body: "Give hardware decision-making brains: draw state bubble diagrams and translate them into rock-solid SystemVerilog FSMs for packet framing and spike detection."
+  },
+  5: {
+    title: "Track 5: Pipelining & Timing",
+    body: "Learn why long combinational paths bottleneck clock speed, and how slicing logic with pipeline registers boosts throughput for real-time DSP."
+  },
+  6: {
+    title: "Track 6: Fixed-Point DSP",
+    body: "Floating-point is expensive in silicon. Master signed two's-complement math, Q-format binary points, saturation, and rounding without overflow glitches."
+  },
+  7: {
+    title: "Capstone Badge: RTL Moving-Average Filter",
+    body: "Combine shift registers, fixed-point adders, and bit-shift division to build a real-time moving-average filter that cleans noisy sEMG / neural waveforms!"
+  }
+};
+
+/* ==================== PERSISTENT STATE ==================== */
+const STORAGE_KEY = "silicon_reps_v1";
+
+function getTodayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function getDaysBetween(dateStrA, dateStrB) {
+  if (!dateStrA || !dateStrB) return 0;
+  const a = new Date(dateStrA + "T00:00:00");
+  const b = new Date(dateStrB + "T00:00:00");
+  return Math.round((b - a) / (1000 * 60 * 60 * 24));
+}
+
+let state = {
+  completedLessons: [],
+  xp: 0,
+  streak: 1,
+  freezes: 3,
+  lastActiveDate: getTodayStr(),
+  autoFrozenNotice: false
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state = { ...state, ...parsed };
+    }
+  } catch (e) {
+    console.warn("Storage unavailable, using in-memory session.");
+  }
+
+  // Zero-guilt streak freeze evaluation on app open
+  const today = getTodayStr();
+  if (state.lastActiveDate && state.lastActiveDate !== today) {
+    const missedDays = getDaysBetween(state.lastActiveDate, today) - 1;
+    if (missedDays > 0) {
+      const freezesUsed = Math.min(state.freezes, missedDays);
+      state.freezes = Math.max(0, state.freezes - freezesUsed);
+      state.lastActiveDate = today;
+      state.autoFrozenNotice = true;
+      saveState();
+    }
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+/* ==================== HOME SCREEN RENDERING ==================== */
+function renderHome() {
+  document.getElementById("hudStreak").textContent = state.streak;
+  document.getElementById("hudFreezes").textContent = state.freezes;
+  document.getElementById("hudXp").textContent = state.xp;
+
+  const doneToday = state.lastActiveDate === getTodayStr() && state.completedLessons.length > 0;
+  const goalBadge = document.getElementById("dailyGoalBadge");
+  const goalTitle = document.getElementById("dailyGoalTitle");
+  const goalSub = document.getElementById("dailyGoalSub");
+
+  if (doneToday) {
+    goalBadge.textContent = "Goal Met ✓";
+    goalBadge.classList.remove("pending");
+    goalTitle.textContent = "Daily rep complete!";
+    goalSub.textContent = "You hit today's goal. Do another rep anytime or rest guilt-free.";
+  } else {
+    goalBadge.textContent = "Today's Rep";
+    goalBadge.classList.add("pending");
+    goalTitle.textContent = "1 lesson a day = full success";
+    goalSub.textContent = state.autoFrozenNotice
+      ? "Streak Freeze protected your streak while you were away. Ready for 1 quick rep?"
+      : "2-minute visual rep. Streak freezes protect missed days automatically.";
+  }
+
+  // Track 1 Progress Bar
+  const pct = Math.round((state.completedLessons.length / LESSONS.length) * 100);
+  document.getElementById("track1ProgressFill").style.width = `${pct}%`;
+
+  // Render Winding Path Nodes
+  const container = document.getElementById("lessonPathContainer");
+  container.innerHTML = "";
+
+  const offsets = ["", "offset-left", "", "offset-right", "", "offset-left"];
+  const nextIdx = LESSONS.findIndex(l => !state.completedLessons.includes(l.id));
+  const activeIdx = nextIdx === -1 ? 0 : nextIdx;
+
+  LESSONS.forEach((lesson, idx) => {
+    const isCompleted = state.completedLessons.includes(lesson.id);
+    const isCurrent = idx === activeIdx && !isCompleted;
+    const isUnlocked = idx <= activeIdx || isCompleted;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = `path-node-wrapper ${offsets[idx % offsets.length]}`;
+
+    let btnClass = "lesson-node-btn";
+    if (isCompleted) btnClass += " completed";
+    else if (isCurrent) btnClass += " current";
+    else if (isUnlocked) btnClass += " unlocked";
+
+    wrapper.innerHTML = `
+      <button class="${btnClass}" onclick="startLesson(${idx})" aria-label="Start ${lesson.title}">
+        ${isCurrent ? '<span class="start-tag">START</span>' : ''}
+        <span style="font-size:28px;">${isCompleted ? '✓' : lesson.icon}</span>
+      </button>
+      <div class="node-label-card">
+        <div class="node-title">${lesson.number}. ${lesson.title}</div>
+        <div class="node-sub">${lesson.subtitle}</div>
+      </div>
+    `;
+    container.appendChild(wrapper);
+  });
+}
+
+/* ==================== LESSON PLAYER ENGINE ==================== */
+let currentLessonIdx = 0;
+let currentStep = 0; // 0..4 (representing Steps 1..5)
+let stepTick = 0;
+let selectedOptionId = null;
+let stepEvaluated = false;
+let stepCorrect = false;
+let repSlots = [null, null];
+
+function startLesson(idx) {
+  currentLessonIdx = idx;
+  currentStep = 0;
+  resetStepState();
+
+  document.getElementById("homeView").style.display = "none";
+  document.getElementById("completeView").classList.remove("active");
+  document.getElementById("lessonView").classList.add("active");
+  renderLessonStep();
+}
+
+function exitLesson() {
+  document.getElementById("lessonView").classList.remove("active");
+  document.getElementById("completeView").classList.remove("active");
+  document.getElementById("homeView").style.display = "block";
+  renderHome();
+}
+
+function resetStepState() {
+  stepTick = 0;
+  selectedOptionId = null;
+  stepEvaluated = false;
+  stepCorrect = false;
+  repSlots = [null, null];
+
+  const footer = document.getElementById("lessonFooter");
+  footer.className = "lesson-footer";
+  const fb = document.getElementById("feedbackMsg");
+  fb.classList.remove("visible");
+}
+
+function renderLessonStep() {
+  const lesson = LESSONS[currentLessonIdx];
+  const stage = document.getElementById("lessonStage");
+  const btn = document.getElementById("primaryActionBtn");
+
+  // Update Progress Bar
+  const stepNum = currentStep + 1;
+  document.getElementById("lessonStepProgress").style.width = `${stepNum * 20}%`;
+  document.getElementById("lessonStepCounter").textContent = `${stepNum} / 5`;
+
+  if (currentStep === 0) {
+    // STEP 1: Drawn Circuit (Visual First)
+    const s = lesson.step1;
+    stage.innerHTML = `
+      <div class="step-kicker">${s.kicker}</div>
+      <h2 class="step-heading">${s.heading}</h2>
+      <div class="visual-box">
+        <div class="visual-box-header">
+          <span>CIRCUIT DIAGRAM</span>
+          <div class="legend-pills">
+            <span class="legend-item"><span class="dot-1"></span>1</span>
+            <span class="legend-item"><span class="dot-0"></span>0</span>
+            <span class="legend-item"><span class="dot-clk"></span>clk</span>
+          </div>
+        </div>
+        ${s.renderCircuit()}
+      </div>
+      <p class="step-body-text">${s.body}</p>
+    `;
+    btn.disabled = false;
+    btn.textContent = "See It Over Time →";
+  }
+  else if (currentStep === 1) {
+    // STEP 2: Interactive Steppable Waveform
+    const s = lesson.step2;
+    stage.innerHTML = `
+      <div class="step-kicker">${s.kicker}</div>
+      <h2 class="step-heading">${s.heading}</h2>
+      <p class="step-body-text">${s.body}</p>
+      <div class="visual-box">
+        <div class="visual-box-header">
+          <span>LIVE WAVEFORM &amp; SCHEMATIC</span>
+          <span style="color:var(--accent-cyan);">Tap button below</span>
+        </div>
+        <div id="interactiveSvgMount">${s.renderInteractive(stepTick)}</div>
+        <div class="clock-control-bar">
+          <span id="tickReadout" class="tick-readout">Step ${stepTick + 1}/${s.ticks}</span>
+          <div style="display:flex;gap:8px;">
+            <button class="reset-wave-btn" onclick="resetWaveform()">↺</button>
+            <button class="step-clock-btn" onclick="advanceWaveform()">${s.btnLabel} ⏭</button>
+          </div>
+        </div>
+        <div id="liveStateCaption" class="live-state-caption">${s.getCaption(stepTick)}</div>
+      </div>
+    `;
+    btn.disabled = false;
+    btn.textContent = "Got It — Try a Prediction →";
+  }
+  else if (currentStep === 2) {
+    // STEP 3: Predict-the-Waveform / Output Quiz
+    const s = lesson.step3;
+    stage.innerHTML = `
+      <div class="step-kicker">${s.kicker}</div>
+      <h2 class="step-heading">${s.heading}</h2>
+      <p class="step-body-text">${s.body}</p>
+      <div class="options-grid">
+        ${s.options.map(opt => `
+          <button class="option-card ${selectedOptionId === opt.id ? 'selected' : ''}"
+                  id="opt_${opt.id}" onclick="selectQuizOption('${opt.id}')">
+            <div class="option-label">
+              <span>${opt.label}</span>
+              <span style="color:var(--text-muted);font-size:12px;">Tap to select</span>
+            </div>
+            ${opt.svg}
+          </button>
+        `).join("")}
+      </div>
+    `;
+    btn.disabled = !selectedOptionId;
+    btn.textContent = "Check Prediction";
+  }
+  else if (currentStep === 3) {
+    // STEP 4: Match Code to Picture (Code appears for the FIRST time)
+    const s = lesson.step4;
+    stage.innerHTML = `
+      <div class="step-kicker">${s.kicker}</div>
+      <h2 class="step-heading">${s.heading}</h2>
+      <p class="step-body-text">${s.body}</p>
+      <div class="visual-box">
+        <div class="visual-box-header"><span>TARGET HARDWARE</span></div>
+        ${s.visualSvg}
+      </div>
+      <div class="options-grid">
+        ${s.options.map(opt => `
+          <button class="option-card ${selectedOptionId === opt.id ? 'selected' : ''}"
+                  id="opt_${opt.id}" onclick="selectQuizOption('${opt.id}')">
+            <div class="option-label"><span>${opt.label}</span></div>
+            <div class="code-block">${opt.code}</div>
+          </button>
+        `).join("")}
+      </div>
+    `;
+    btn.disabled = !selectedOptionId;
+    btn.textContent = "Check Match";
+  }
+  else if (currentStep === 4) {
+    // STEP 5: One Tiny Rep (Tap-Token SystemVerilog)
+    const s = lesson.step5;
+    renderRepStep(s);
+    btn.disabled = repSlots.includes(null);
+    btn.textContent = "Verify RTL Rep";
+  }
+}
+
+function advanceWaveform() {
+  const s = LESSONS[currentLessonIdx].step2;
+  stepTick = (stepTick + 1) % s.ticks;
+  document.getElementById("interactiveSvgMount").innerHTML = s.renderInteractive(stepTick);
+  document.getElementById("tickReadout").textContent = `Step ${stepTick + 1}/${s.ticks}`;
+  document.getElementById("liveStateCaption").textContent = s.getCaption(stepTick);
+}
+
+function resetWaveform() {
+  stepTick = 0;
+  const s = LESSONS[currentLessonIdx].step2;
+  document.getElementById("interactiveSvgMount").innerHTML = s.renderInteractive(0);
+  document.getElementById("tickReadout").textContent = `Step 1/${s.ticks}`;
+  document.getElementById("liveStateCaption").textContent = s.getCaption(0);
+}
+
+function selectQuizOption(id) {
+  if (stepEvaluated && stepCorrect) return;
+  // Reset any prior wrong state
+  if (stepEvaluated && !stepCorrect) {
+    stepEvaluated = false;
+    document.getElementById("lessonFooter").className = "lesson-footer";
+    document.getElementById("feedbackMsg").classList.remove("visible");
+  }
+  selectedOptionId = id;
+  document.querySelectorAll(".option-card").forEach(el => {
+    el.classList.remove("selected", "wrong", "correct");
+  });
+  const chosen = document.getElementById(`opt_${id}`);
+  if (chosen) chosen.classList.add("selected");
+  document.getElementById("primaryActionBtn").disabled = false;
+  document.getElementById("primaryActionBtn").textContent = "Check Answer";
+}
+
+function renderRepStep(s) {
+  const stage = document.getElementById("lessonStage");
+  const codeHtml = s.codeTemplate.map(part => {
+    if (part.type === "kw") return `<span class="sv-kw">${part.val}</span>`;
+    if (part.type === "text") return part.val;
+    if (part.type === "blank") {
+      const val = repSlots[part.index];
+      return `<span class="blank-slot ${val ? 'filled' : ''}" onclick="clearRepSlot(${part.index})">${val || '___'}</span>`;
+    }
+    return "";
+  }).join("");
+
+  stage.innerHTML = `
+    <div class="step-kicker">${s.kicker}</div>
+    <h2 class="step-heading">${s.heading}</h2>
+    <p class="step-body-text">${s.body}</p>
+
+    <div class="code-builder-box">${codeHtml}</div>
+
+    <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-top:4px;">
+      TAP TOKENS TO FILL BLANKS (tap a filled slot to clear):
+    </div>
+    <div class="token-bank">
+      ${s.tokens.map(tok => {
+        const isUsed = repSlots.includes(tok);
+        return `<button class="token-chip ${isUsed ? 'used' : ''}" onclick="fillRepToken('${tok.replace(/'/g, "\\'")}')">${tok}</button>`;
+      }).join("")}
+    </div>
+
+    <div id="hwNoteMount" style="display:none;" class="hardware-note-box">
+      <strong>Why This Matters in Real Silicon</strong>
+      ${s.hwNote}
+    </div>
+  `;
+}
+
+function fillRepToken(tok) {
+  if (stepEvaluated && stepCorrect) return;
+  if (stepEvaluated && !stepCorrect) {
+    stepEvaluated = false;
+    document.getElementById("lessonFooter").className = "lesson-footer";
+    document.getElementById("feedbackMsg").classList.remove("visible");
+  }
+  const emptyIdx = repSlots.indexOf(null);
+  if (emptyIdx !== -1) {
+    repSlots[emptyIdx] = tok;
+    renderRepStep(LESSONS[currentLessonIdx].step5);
+    const btn = document.getElementById("primaryActionBtn");
+    btn.disabled = repSlots.includes(null);
+    btn.textContent = "Verify RTL Rep";
+  }
+}
+
+function clearRepSlot(idx) {
+  if (stepEvaluated && stepCorrect) return;
+  if (stepEvaluated && !stepCorrect) {
+    stepEvaluated = false;
+    document.getElementById("lessonFooter").className = "lesson-footer";
+    document.getElementById("feedbackMsg").classList.remove("visible");
+  }
+  repSlots[idx] = null;
+  renderRepStep(LESSONS[currentLessonIdx].step5);
+  document.getElementById("primaryActionBtn").disabled = true;
+}
+
+function handlePrimaryAction() {
+  const lesson = LESSONS[currentLessonIdx];
+
+  // Steps 1 & 2 advance directly
+  if (currentStep === 0 || currentStep === 1) {
+    currentStep++;
+    resetStepState();
+    renderLessonStep();
+    return;
+  }
+
+  // Steps 3 & 4: Evaluate Multiple Choice
+  if (currentStep === 2 || currentStep === 3) {
+    if (!stepEvaluated) {
+      const stepObj = currentStep === 2 ? lesson.step3 : lesson.step4;
+      const chosen = stepObj.options.find(o => o.id === selectedOptionId);
+      if (!chosen) return;
+
+      stepEvaluated = true;
+      stepCorrect = chosen.correct;
+
+      const footer = document.getElementById("lessonFooter");
+      const fb = document.getElementById("feedbackMsg");
+      const fbTitle = document.getElementById("feedbackTitle");
+      const fbDetail = document.getElementById("feedbackDetail");
+      const btn = document.getElementById("primaryActionBtn");
+      const card = document.getElementById(`opt_${chosen.id}`);
+
+      fb.classList.add("visible");
+      if (stepCorrect) {
+        card.classList.remove("selected");
+        card.classList.add("correct");
+        footer.classList.add("feedback-ok");
+        fbTitle.textContent = "Clean read! ✓";
+        fbDetail.textContent = stepObj.explanation;
+        btn.textContent = "Continue →";
+      } else {
+        card.classList.remove("selected");
+        card.classList.add("wrong");
+        footer.classList.add("feedback-err");
+        fbTitle.textContent = "Not quite — look closely at the trace";
+        fbDetail.textContent = "Tap the other option to try again.";
+        btn.textContent = "Try Again";
+        btn.disabled = true;
+      }
+      return;
+    } else if (stepCorrect) {
+      currentStep++;
+      resetStepState();
+      renderLessonStep();
+      return;
+    }
+  }
+
+  // Step 5: Evaluate Tap-Token RTL Rep
+  if (currentStep === 4) {
+    if (!stepEvaluated) {
+      const s = lesson.step5;
+      const isRight = repSlots[0] === s.answer[0] && repSlots[1] === s.answer[1];
+      stepEvaluated = true;
+      stepCorrect = isRight;
+
+      const footer = document.getElementById("lessonFooter");
+      const fb = document.getElementById("feedbackMsg");
+      const fbTitle = document.getElementById("feedbackTitle");
+      const fbDetail = document.getElementById("feedbackDetail");
+      const btn = document.getElementById("primaryActionBtn");
+
+      fb.classList.add("visible");
+      if (isRight) {
+        footer.classList.add("feedback-ok");
+        fbTitle.textContent = "Synthesizes cleanly! ⚡";
+        fbDetail.textContent = "You just wrote valid SystemVerilog RTL from visual intuition.";
+        document.getElementById("hwNoteMount").style.display = "block";
+        btn.textContent = "Finish Lesson (+25 XP)";
+      } else {
+        footer.classList.add("feedback-err");
+        fbTitle.textContent = "Check the token order";
+        fbDetail.textContent = "Tap a filled slot to clear it and swap tokens.";
+        btn.textContent = "Fix Tokens";
+        btn.disabled = true;
+      }
+      return;
+    } else if (stepCorrect) {
+      completeCurrentLesson();
+    }
+  }
+}
+
+function completeCurrentLesson() {
+  const lesson = LESSONS[currentLessonIdx];
+  const today = getTodayStr();
+
+  // Award XP
+  state.xp += 25;
+
+  // Update Streak safely (never resets on missed days)
+  if (state.lastActiveDate !== today) {
+    state.streak += 1;
+    state.lastActiveDate = today;
+  } else if (state.completedLessons.length === 0) {
+    state.streak = Math.max(1, state.streak);
+  }
+
+  if (!state.completedLessons.includes(lesson.id)) {
+    state.completedLessons.push(lesson.id);
+  }
+  state.autoFrozenNotice = false;
+  saveState();
+
+  // Show Celebration Screen
+  document.getElementById("lessonView").classList.remove("active");
+  document.getElementById("completeLessonName").textContent =
+    `You completed "${lesson.title}". One rep a day builds real silicon intuition.`;
+  document.getElementById("completeStreakVal").textContent =
+    `${state.streak} ${state.streak === 1 ? 'Day' : 'Days'}`;
+  document.getElementById("completeView").classList.add("active");
+}
+
+function returnHome() {
+  document.getElementById("completeView").classList.remove("active");
+  document.getElementById("homeView").style.display = "block";
+  renderHome();
+}
+
+/* ==================== MODALS ==================== */
+function openStreakModal() {
+  document.getElementById("modalTitle").textContent = `🔥 ${state.streak}-Day Streak • ❄️ ${state.freezes} Freezes`;
+  document.getElementById("modalBody").textContent =
+    "One 2-minute lesson per day counts as a full win. If exams or lab work keep you away for a day, a Streak Freeze applies automatically so your progress never resets.";
+  document.getElementById("infoModal").classList.add("open");
+}
+
+function openTrackPreview(trackNum) {
+  const info = TRACK_PREVIEWS[trackNum];
+  if (!info) return;
+  document.getElementById("modalTitle").textContent = info.title;
+  document.getElementById("modalBody").textContent = info.body;
+  document.getElementById("infoModal").classList.add("open");
+}
+
+function closeModal(e) {
+  if (!e || e.target.id === "infoModal") {
+    document.getElementById("infoModal").classList.remove("open");
+  }
+}
+
+// Boot App
+loadState();
+renderHome();
+</script>
+</body>
+</html>
